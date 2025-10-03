@@ -1,5 +1,11 @@
+import sys
+import os
 import pytest
 from unittest.mock import MagicMock
+
+# Add the parent folder to sys.path so we can import models
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
 from models import Base, Admin, Product
 from sqlalchemy.orm import Session
 
@@ -45,7 +51,7 @@ def test_model_creation_mock(model_class):
     assert obj is not None
 
 # -------------------------------
-# 2️. Test: Duplicate Admin email (stub)
+# 2. Test: Duplicate Admin email (stub)
 # -------------------------------
 def test_admin_duplicate_email_stub():
     class StubQuery:
@@ -71,7 +77,7 @@ def test_admin_duplicate_email_stub():
         session.commit()
 
 # -------------------------------
-# 3️. Test: Upgrade role requires SuperAdmin (mock)
+# 3. Test: Upgrade role requires SuperAdmin (mock)
 # -------------------------------
 def test_upgrade_role_mock():
     fake_session = MagicMock()
