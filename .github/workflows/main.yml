@@ -26,4 +26,4 @@ jobs:
       - run: pip install pytest sqlalchemy
 
       # 5️⃣ Run pytest on your tests folder
-      - run: pytest -v "python files/tests"
+      - run: pytest -v "Python files/tests"
