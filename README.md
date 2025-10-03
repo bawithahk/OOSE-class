@@ -36,10 +36,10 @@
 ## 📄 Design Documentation
 
 ### `docs/` folder
-- **Figma_designs.docx**: Visual UI designs and wireframes from Figma.
-- **Class_Diagrams.docx**: UML diagrams showing classes, attributes, and relationships.
-- **Deployment_Diagrams.docx**: Architecture and deployment diagrams.
-- **Sequence_Diagrams.docx**: UML sequence diagrams showing interactions.
+- **Design.docx**: Visual UI designs and wireframes from Figma.
+- **HW4.docx**: UML diagrams showing classes, attributes, and relationships.
+- **HW4.docx**: Architecture and deployment diagrams.
+- **HW5.docx**: UML sequence diagrams showing interactions.
 - **Other_design_docs.docx**: Additional design and planning documents.
 
 ---
