@@ -1,101 +1,63 @@
-import sys
-import os
 import pytest
 from unittest.mock import MagicMock
+from admin_service import add_admin, update_admin_role, delete_admin
+from models import Admin
 
-# Add the parent folder to sys.path so we can import models
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-
-from models import Base, Admin, Product
-from sqlalchemy.orm import Session
 
 # -------------------------------
-# Helper: generate fake objects for models
+# ✅ TEST 1 — Add Admin (uses MOCK)
 # -------------------------------
-def create_stub_admin(email="stub@test.com"):
-    # Stub admin to simulate an existing entry
-    return Admin(name="StubAdmin", email=email, password="stub123", role="Admin")
+def test_add_admin_success():
+    mock_session = MagicMock()
+    mock_session.query().filter_by().first.return_value = None  # No existing admin
 
-def generate_test_objects(model_class, admin_id=None):
-    if model_class.__name__ == "Admin":
-        return Admin(name="TestAdmin", email="test@test.com", password="pass", role="Admin")
-    elif model_class.__name__ == "Product":
-        return Product(
-            adminID=admin_id or 1,
-            name="TestProduct",
-            price=100.0,
-            category="Electronics",
-            stockQuantity=10
-        )
-    else:
-        return None
+    result = add_admin(mock_session, "Alice", "alice@example.com", "pass123", "Admin")
+
+    mock_session.add.assert_called_once()
+    mock_session.commit.assert_called_once()
+    assert isinstance(result, Admin)
+    assert result.name == "Alice"
+
 
 # -------------------------------
-# 1. Test: Basic creation with mock session
+# ✅ TEST 2 — Add Admin duplicate email (uses STUB)
 # -------------------------------
-@pytest.mark.parametrize("model_class", [Admin, Product])
-def test_model_creation_mock(model_class):
-    fake_session = MagicMock(spec=Session)
+def test_add_admin_duplicate_email():
+    mock_session = MagicMock()
+    # Stub: pretend an admin already exists
+    mock_session.query().filter_by().first.return_value = Admin(name="Alice", email="alice@example.com", password="pass", role="Admin")
 
-    if model_class.__name__ == "Product":
-        obj = generate_test_objects(model_class, admin_id=1)
-    else:
-        obj = generate_test_objects(model_class)
+    with pytest.raises(ValueError, match="already exists"):
+        add_admin(mock_session, "Bob", "alice@example.com", "pass123", "Admin")
 
-    fake_session.add(obj)
-    fake_session.commit()
-
-    # Assertions to ensure mock was called
-    fake_session.add.assert_called_once_with(obj)
-    fake_session.commit.assert_called_once()
-    assert obj is not None
 
 # -------------------------------
-# 2. Test: Duplicate Admin email (stub)
+# ✅ TEST 3 — Update Admin role (uses MOCK)
 # -------------------------------
-def test_admin_duplicate_email_stub():
-    class StubQuery:
-        def filter_by(self, **kwargs):
-            return self
-        def first(self):
-            return create_stub_admin()  # simulate existing admin
+def test_update_admin_role_success():
+    mock_session = MagicMock()
+    fake_admin = Admin(name="Bob", email="bob@example.com", password="1234", role="User")
 
-    class StubSession:
-        query = lambda self, model: StubQuery()
-        add = lambda self, obj: None
-        commit = lambda self: None
+    # Stub the query to return our fake admin
+    mock_session.query().filter_by().first.return_value = fake_admin
 
-    session = StubSession()
+    updated = update_admin_role(mock_session, "bob@example.com", "SuperAdmin")
 
-    # Simulated business logic
-    existing = session.query(Admin).filter_by(email="stub@test.com").first()
-    with pytest.raises(ValueError):
-        if existing:
-            raise ValueError("Admin with this email already exists")
-        admin = Admin(name="TestAdmin2", email="stub@test.com", password="pass", role="Admin")
-        session.add(admin)
-        session.commit()
+    assert updated.role == "SuperAdmin"
+    mock_session.commit.assert_called_once()
+
 
 # -------------------------------
-# 3. Test: Upgrade role requires SuperAdmin (mock)
+# ✅ TEST 4 — Delete Admin (uses MOCK)
 # -------------------------------
-def test_upgrade_role_mock():
-    fake_session = MagicMock()
-    admin = Admin(name="Charlie", email="charlie@test.com", password="1234", role="Admin")
-    super_admin = Admin(name="Super", email="super@test.com", password="1234", role="SuperAdmin")
-    normal_admin = Admin(name="Normal", email="normal@test.com", password="1234", role="Admin")
+def test_delete_admin_success():
+    mock_session = MagicMock()
+    fake_admin = Admin(name="John", email="john@example.com", password="pass", role="Admin")
 
-    # Attempt upgrade by non-SuperAdmin -> should fail
-    with pytest.raises(PermissionError):
-        if normal_admin.role != "SuperAdmin":
-            raise PermissionError("Only SuperAdmin can upgrade roles")
-        admin.role = "SuperAdmin"
-        fake_session.commit()
+    # Stub query to return admin
+    mock_session.query().filter_by().first.return_value = fake_admin
 
-    # Upgrade by SuperAdmin
-    if super_admin.role == "SuperAdmin":
-        admin.role = "SuperAdmin"
-        fake_session.commit()
+    delete_admin(mock_session, "john@example.com")
 
-    assert admin.role == "SuperAdmin"
-    fake_session.commit.assert_called_once()
+    mock_session.delete.assert_called_once_with(fake_admin)
+    mock_session.commit.assert_called_once()
