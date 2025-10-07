@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import MagicMock
-from admin_service import add_admin, update_admin_role, delete_admin
+from adminService import add_admin, update_admin_role, delete_admin
 from models import Admin
 
 
