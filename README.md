@@ -27,9 +27,10 @@
 - Unit tests for Python models and business logic.
 - Uses **pytest**, **mocks**, and **stubs**.
 - Includes:
-  1. Mocked creation of Admin/Product objects.
+  1. Mocked tests of adding new admin
   2. Stubbed query to prevent duplicate Admin email.
   3. Mocked test for SuperAdmin role upgrade permission.
+  4. Mocked test for deleting admin.
 
 ---
 
