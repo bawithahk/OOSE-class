@@ -25,5 +25,7 @@ jobs:
       # 4️. Install dependencies
       - run: pip install pytest sqlalchemy
 
-      # 5️. Run pytest on tests folder
-      - run: pytest -v "Python files/tests"
+      # 5️. Run pytest with PYTHONPATH using the same command as Windows
+      - run: |
+          export PYTHONPATH="$PYTHONPATH:$GITHUB_WORKSPACE/python_files"
+          python -m pytest -v python_files/tests
